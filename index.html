@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commanding Discovered Styles: Weakly Supervised Motion Discovery for Compositional Control</title>
+  <style>
+    :root {
+      --primary-color: #1a73e8;
+      --text-color: #202124;
+      --text-secondary: #5f6368;
+      --bg-light: #f8f9fa;
+      --border-color: #dadce0;
+      --card-bg: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(60,64,67,0.12), 0 1px 2px rgba(60,64,67,0.24);
+      --shadow-md: 0 4px 6px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+      background-color: #ffffff;
+      padding: 0 1rem;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 3rem 0;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+      color: #111;
+    }
+
+    .submission-badge {
+      display: inline-block;
+      background: #e8f0fe;
+      color: var(--primary-color);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      border: 1px solid #d2e3fc;
+    }
+
+    .authors-anonymous {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Abstract Card */
+    .abstract-box {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 3rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .abstract-box h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: #111;
+    }
+
+    .abstract-box p {
+      color: #3c4043;
+      font-size: 1.02rem;
+      text-align: justify;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 3.5rem;
+    }
+
+    h2.section-heading {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    p.section-intro {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Stages Grid */
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stage-num {
+      display: inline-block;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .stage-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stage-card p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .video-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .video-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .video-container {
+      position: relative;
+      background: #111;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-info {
+      padding: 1rem 1.25rem;
+    }
+
+    .video-info h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: #202124;
+    }
+
+    .video-info p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.4rem;
+    }
+
+    .tag-hardware { background: #e6f4ea; color: #137333; }
+    .tag-sim { background: #feefe3; color: #c5221f; }
+    .tag-transition { background: #e8eaed; color: #3c4043; }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.65rem; }
+      .container { padding: 1.5rem 0; }
+      .abstract-box { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="submission-badge">Supplementary Video Material</div>
+      <h1>Commanding Discovered Styles:<br>Weakly Supervised Motion Discovery for Compositional Control</h1>
+      <div class="authors-anonymous">Anonymous Authors — Submission to ICRA</div>
+    </header>
+
+    <!-- Abstract -->
+    <div class="abstract-box">
+      <h2>Abstract</h2>
+      <p>
+        Robot motion control in complex settings requires adopting different motion styles on demand while tracking user-specified task commands. However, composing styles and commands is challenging: motion styles are difficult to implement analytically and reuse across platforms, while recorded motion data typically contain entangled combinations of embodiments, motion regimes, and constraints. We present a framework for compositional motion control that derives a repertoire of styles from motion recordings and enables a shared controller to express those styles while following independently specified user commands. First, motion recordings from multiple sources are expressed on a common target embodiment. Second, a weakly supervised style discovery module extracts candidate styles using an ensemble consensus representation and density-based clustering, organizing observed motion into reference pools without prescribing the repertoire size. Third, a shared controller is trained using reinforcement learning, conditioned on an observed style reference alongside an independent task command. We evaluate the framework on a quadruped robot across repertoire coherence, commandability, and style expressibility measured via reference consensus cosine, and demonstrate mechanically distinct style execution on physical hardware.
+      </p>
+    </div>
+
+    <!-- Framework Stages Overview -->
+    <section>
+      <h2 class="section-heading">Framework Overview</h2>
+      <p class="section-intro">
+        The pipeline decouples style discovery from policy execution through three stages, enabling on-demand style conditioning under arbitrary independent task commands:
+      </p>
+      <div class="stages-grid">
+        <div class="stage-card">
+          <div class="stage-num">Stage 1</div>
+          <h3>Common Target Embodiment</h3>
+          <p>Motion data from multiple sources (including retargeted animal movements and teleoperated runs) are executed and recorded on a common quadruped platform to ensure kinematic realizability.</p>
+        </div>
+        <div class="stage-card">
+          <div class="stage-num">Stage 2</div>
+          <h3>Weakly Supervised Discovery</h3>
+          <p>An ensemble of temporal convolutional encoders learns an orthogonal-invariant consensus spherical geometry. HDBSCAN extracts 16 candidate styles and groups windows into reference pools without manual cluster thresholds.</p>
+        </div>
+        <div class="stage-card">
+          <div class="stage-num">Stage 3</div>
+          <h3>Compositional Controller</h3>
+          <p>A shared reinforcement learning policy is conditioned on a selected reference consensus code alongside independently commanded velocities, learning to retain the requested style while following task commands.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Hardware Deployments -->
+    <section>
+      <h2 class="section-heading">1. Real-World Robot Deployments (Unitree Go2)</h2>
+      <p class="section-intro">
+        Physical quadruped hardware trials demonstrating distinct style execution on demand under user-commanded forward and heading velocities.
+      </p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/hardware_style_c00.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-hardware">Physical Deployment</span>
+            <h4>Style C00 Execution</h4>
+            <p>Execution of discovered candidate style C00 across commanded forward speeds on physical terrain.</p>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/hardware_style_c14.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-hardware">Physical Deployment</span>
+            <h4>Style C14 Execution</h4>
+            <p>Characteristic trotting gait maintaining foot clearance and posture under live operator commands.</p>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/hardware_style_c06.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-hardware">Physical Deployment</span>
+            <h4>Style C06 Execution</h4>
+            <p>Mechanical distinction in base height, stride duration, and contact phase compared to default locomotion.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Matched Simulation & Style Preservation -->
+    <section>
+      <h2 class="section-heading">2. Matched Simulation Rollouts Across Commanded Velocities</h2>
+      <p class="section-intro">
+        Matched evaluation across candidate styles evaluated at varying forward velocity profiles (0.5 m/s, 0.8 m/s, and style reference velocity).
+      </p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/sim_vx0p5_matched.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
+            <h4>Low Velocity Profile (0.5 m/s)</h4>
+            <p>Evaluating style preservation and tracking accuracy when commanded speed differs from the reference recording speed.</p>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/sim_vx0p8_matched.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
+            <h4>High Velocity Profile (0.8 m/s)</h4>
+            <p>Assessing style expressibility and dynamic stability at higher commanded transit rates.</p>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/sim_ref_vx_matched.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
+            <h4>Nominal Reference Velocity</h4>
+            <p>Tracking the recording's original forward velocity while maintaining reference consensus fidelity.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Dynamic Transitions -->
+    <section>
+      <h2 class="section-heading">3. Dynamic Online Style Transitions</h2>
+      <p class="section-intro">
+        Switching between candidate style references in real time under continuous, fixed forward velocity commands.
+      </p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-container">
+            <video controls autoplay loop muted playsinline src="videos/transitions_schedule.mp4"></video>
+          </div>
+          <div class="video-info">
+            <span class="tag tag-transition">Transitions</span>
+            <h4>Sequential Multi-Style Switch</h4>
+            <p>Consecutive reference switches (C00 &rarr; C14 &rarr; C06 &rarr; C04 &rarr; C07) showing rapid adaptation without gait failure.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Anonymous Supplementary Material for Double-Blind Peer Review.</p>
+    </footer>
+  </div>
+
+</body>
+</html>
