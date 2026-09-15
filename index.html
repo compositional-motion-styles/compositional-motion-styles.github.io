@@ -3,17 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commanding Discovered Styles: Weakly Supervised Motion Discovery for Compositional Control</title>
+  <title>Weakly Supervised Discovery of Motion Styles for Compositional Robot Control</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Preloaded Data Files for local and web serving -->
+  <script src="data/references_data.min.js"></script>
+
+  <!-- KaTeX for Fast & Reliable LaTeX Math Rendering (Local + CDN Fallback) -->
+  <link rel="stylesheet" href="libs/katex/katex.min.css">
+  <script src="libs/katex/katex.min.js"></script>
+  <script src="libs/katex/contrib/auto-render.min.js"></script>
+  <script>
+    if (!window.katex) {
+      document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"><\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"><\/script>');
+    }
+  </script>
+
   <style>
     :root {
-      --primary-color: #1a73e8;
-      --text-color: #202124;
-      --text-secondary: #5f6368;
-      --bg-light: #f8f9fa;
-      --border-color: #dadce0;
-      --card-bg: #ffffff;
-      --shadow-sm: 0 1px 3px rgba(60,64,67,0.12), 0 1px 2px rgba(60,64,67,0.24);
-      --shadow-md: 0 4px 6px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.1);
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --primary-accent: #2563eb;
+      --accent-teal: #0d9488;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-focus: #94a3b8;
+      
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+      --color-source-only: #4C78A8;
+      --color-both: #24958A;
+      --color-novel: #2A9D55;
+      --color-failed: #E5E7EB;
     }
 
     * {
@@ -23,365 +62,1314 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--text-color);
-      line-height: 1.6;
-      background-color: #ffffff;
-      padding: 0 1rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg-page);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      max-width: 1040px;
+    /* Top Navigation */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+    }
+
+    .nav-container {
+      max-width: 1240px;
       margin: 0 auto;
-      padding: 3rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
-
-    h1 {
-      font-size: 2.1rem;
+    .nav-brand {
       font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 0.75rem;
-      color: #111;
+      font-size: 1.05rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
     }
 
-    .submission-badge {
-      display: inline-block;
-      background: #e8f0fe;
-      color: var(--primary-color);
-      padding: 0.4rem 1rem;
-      border-radius: 20px;
-      font-size: 0.95rem;
+    .nav-brand span {
+      background: var(--primary-light);
+      color: white;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
       font-weight: 500;
-      margin-bottom: 1.5rem;
-      border: 1px solid #d2e3fc;
+      transition: color 0.15s ease;
     }
 
-    .authors-anonymous {
-      font-size: 1.15rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-      margin-bottom: 0.5rem;
+    .nav-links a:hover {
+      color: var(--primary-accent);
     }
 
-    /* Abstract Card */
-    .abstract-box {
-      background: var(--bg-light);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1.75rem;
-      margin-bottom: 3rem;
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    /* Hero Header */
+    header.hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      padding: 1rem 0;
+    }
+
+    .submission-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #eff6ff;
+      color: var(--primary-accent);
+      border: 1px solid #bfdbfe;
+      padding: 0.4rem 1.2rem;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
       box-shadow: var(--shadow-sm);
     }
 
-    .abstract-box h2 {
-      font-size: 1.3rem;
-      margin-bottom: 0.75rem;
-      color: #111;
+    .submission-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--primary-accent);
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
     }
 
-    .abstract-box p {
-      color: #3c4043;
-      font-size: 1.02rem;
-      text-align: justify;
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* Sections */
-    section {
-      margin-bottom: 3.5rem;
+    h1.hero-title {
+      font-size: 2.45rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #090e17;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.025em;
     }
 
-    h2.section-heading {
-      font-size: 1.5rem;
+    .authors-meta {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 1.75rem;
+    }
+
+    .action-links {
+      display: flex;
+      justify-content: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.35rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
       font-weight: 600;
-      color: #111;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
     }
 
-    p.section-intro {
-      color: var(--text-secondary);
+    .btn-primary {
+      background: #0f172a;
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--border-focus);
+      background: var(--bg-subtle);
+      transform: translateY(-1px);
+    }
+
+    /* Abstract Box */
+    .abstract-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2.25rem;
+      margin-bottom: 4rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .abstract-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #0d9488, #d97706);
+    }
+
+    .abstract-card h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .abstract-card p {
+      font-size: 1.02rem;
+      line-height: 1.8;
+      color: #334155;
+      text-align: justify;
+      margin-bottom: 1rem;
+    }
+
+    .abstract-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Section Styling */
+    section.content-section {
+      margin-bottom: 5rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .section-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.075em;
+      color: var(--primary-accent);
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    h2.section-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.015em;
+      margin-bottom: 0.5rem;
+    }
+
+    p.section-description {
       font-size: 1.05rem;
-      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+      max-width: 950px;
+      line-height: 1.6;
+    }
+
+    /* Card Wrapper */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Figures */
+    .figure-container {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .figure-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .figure-caption {
+      margin-top: 1.25rem;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      text-align: left;
+      padding: 0 0.5rem;
+    }
+
+    .figure-caption strong {
+      color: #0f172a;
     }
 
     /* Stages Grid */
     .stages-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1.5rem;
-      margin-bottom: 2rem;
     }
 
     .stage-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1.5rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.65rem;
       box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .stage-num {
-      display: inline-block;
-      background: var(--primary-color);
+    .stage-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary-accent);
       color: white;
       font-weight: 700;
       font-size: 0.85rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
 
     .stage-card h3 {
       font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
       margin-bottom: 0.5rem;
     }
 
     .stage-card p {
       font-size: 0.95rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
+      line-height: 1.6;
     }
 
-    /* Video Grid */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-      gap: 1.75rem;
+    /* Real-World Deployment Section */
+    .deployment-showcase {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
     }
 
-    .video-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
+    .video-player-wrapper {
+      position: relative;
+      background: #000;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+    }
+
+    .video-player-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .deployment-details {
+      padding: 1.75rem 2rem;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+    }
+
+    .deployment-meta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag-hardware-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .resolution-toggle {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 3px;
+    }
+
+    .res-btn {
+      border: 0;
+      background: transparent;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .res-btn.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .deployment-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .dep-feature {
+      background: var(--bg-subtle);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+
+    .dep-feature h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+    }
+
+    .dep-feature p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.25rem 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .control-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 280px;
+      flex: 1;
+    }
+
+    .control-field label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-light);
+    }
+
+    select.custom-select {
+      width: 100%;
+      min-height: 42px;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    select.custom-select:focus {
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Reference Gallery Grid */
+    .reference-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .ref-video-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
       overflow: hidden;
       box-shadow: var(--shadow-sm);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .video-card:hover {
-      box-shadow: var(--shadow-md);
+    .ref-video-card:hover {
       transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
-    .video-container {
-      position: relative;
-      background: #111;
+    .ref-video-thumb {
       width: 100%;
       aspect-ratio: 16 / 9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #0a0e17;
+      position: relative;
     }
 
-    .video-container video {
+    .ref-video-thumb video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
-    .video-info {
-      padding: 1rem 1.25rem;
+    .ref-video-info {
+      padding: 1rem 1.15rem;
     }
 
-    .video-info h4 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 0.35rem;
-      color: #202124;
-    }
-
-    .video-info p {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    .tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
+    .ref-video-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 0.4rem;
     }
 
-    .tag-hardware { background: #e6f4ea; color: #137333; }
-    .tag-sim { background: #feefe3; color: #c5221f; }
-    .tag-transition { background: #e8eaed; color: #3c4043; }
+    .ref-sample-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary-accent);
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
 
-    footer {
-      border-top: 1px solid var(--border-color);
-      padding: 2rem 0;
-      text-align: center;
-      color: var(--text-secondary);
+    .ref-source-name {
+      font-size: 0.92rem;
+      font-weight: 650;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 0.35rem;
+      word-break: break-word;
+    }
+
+    .ref-window-note {
+      font-size: 0.82rem;
+      color: var(--text-light);
+    }
+
+    /* Pair Comparison View (U-C10) */
+    .pair-comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .pair-col-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pair-col-header {
+      padding: 0.75rem 1.25rem;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
       font-size: 0.9rem;
-      margin-top: 4rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Protocol Specification Card */
+    .protocol-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .protocol-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .protocol-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .protocol-item {
+      background: var(--bg-subtle);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem 1.15rem;
+    }
+
+    .protocol-item h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary-accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .protocol-item p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Comparison Tables */
+    .tables-duo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .table-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+
+    .table-box h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
+    }
+
+    .table-box p.table-sub {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 0.85rem;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    table.data-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    table.data-table td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    table.data-table tr.highlight-row {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    /* Affordance Explorer Section */
+    .affordance-panel {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      padding: 1.75rem;
+    }
+
+    .affordance-top-split {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .affordance-videos-duo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .replay-player-card {
+      background: #090e17;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .replay-player-title {
+      background: #0f172a;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .replay-player-card video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+
+    .telemetry-hud {
+      background: #090e17;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #1e293b;
+      box-shadow: var(--shadow-md);
+    }
+
+    .hud-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .hud-label {
+      color: #94a3b8;
+    }
+
+    .hud-val {
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .hud-status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    .hud-reference-note {
+      margin-top: 0.85rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #1e293b;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* Heatmap Grid */
+    .heatmap-section {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .heatmap-header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .heatmap-stats-pill {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .affordance-matrix {
+      display: grid;
+      gap: 3px;
+      min-width: 820px;
+      margin-top: 0.5rem;
+    }
+
+    .cell-box {
+      aspect-ratio: 1.35;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+    }
+
+    .cell-box:hover, .cell-box.active-cell {
+      outline: 3px solid #f59e0b;
+      outline-offset: 1px;
+      z-index: 10;
+      transform: scale(1.08);
+      box-shadow: var(--shadow-md);
+    }
+
+    .cell-box.has-source::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 5px;
+      height: 5px;
+      background: #f59e0b;
+      border-radius: 50%;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    }
+
+    /* Axis Labels */
+    .matrix-axis-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-top: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Legend */
+    .affordance-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.92rem;
+      margin-top: 5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .affordance-top-split {
+        grid-template-columns: 1fr;
+      }
+      .pair-comparison-grid {
+        grid-template-columns: 1fr;
+      }
+      .tables-duo-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 768px) {
-      h1 { font-size: 1.65rem; }
-      .container { padding: 1.5rem 0; }
-      .abstract-box { padding: 1.25rem; }
+      h1.hero-title {
+        font-size: 1.95rem;
+      }
+      .affordance-videos-duo {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-container">
+      <a href="#" class="nav-brand">
+        CODES <span>ICRA 2027</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#overview">Framework</a></li>
+        <li><a href="#real-world">Robot Deployment</a></li>
+        <li><a href="#reference-motions">Reference Bank</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <div class="container">
-    <header>
-      <div class="submission-badge">Supplementary Video Material</div>
-      <h1>Commanding Discovered Styles:<br>Weakly Supervised Motion Discovery for Compositional Control</h1>
-      <div class="authors-anonymous">Anonymous Authors — Submission to ICRA</div>
+
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="submission-pill">Submission to ICRA 2027 · Supplementary Material</div>
+      <h1 class="hero-title">Weakly Supervised Discovery of Motion Styles<br>for Compositional Robot Control</h1>
+      <div class="authors-meta">Anonymous Authors</div>
+      
+      <div class="action-links">
+        <a href="#overview" class="btn btn-primary">Framework Overview</a>
+        <a href="#real-world" class="btn btn-outline">Robot Deployment</a>
+        <a href="#reference-motions" class="btn btn-outline">Reference Bank</a>
+      </div>
     </header>
 
-    <!-- Abstract -->
-    <div class="abstract-box">
+    <!-- Abstract Card -->
+    <div class="abstract-card">
       <h2>Abstract</h2>
       <p>
-        Robot motion control in complex settings requires adopting different motion styles on demand while tracking user-specified task commands. However, composing styles and commands is challenging: motion styles are difficult to implement analytically and reuse across platforms, while recorded motion data typically contain entangled combinations of embodiments, motion regimes, and constraints. We present a framework for compositional motion control that derives a repertoire of styles from motion recordings and enables a shared controller to express those styles while following independently specified user commands. First, motion recordings from multiple sources are expressed on a common target embodiment. Second, a weakly supervised style discovery module extracts candidate styles using an ensemble consensus representation and density-based clustering, organizing observed motion into reference pools without prescribing the repertoire size. Third, a shared controller is trained using reinforcement learning, conditioned on an observed style reference alongside an independent task command. We evaluate the framework on a quadruped robot across repertoire coherence, commandability, and style expressibility measured via reference consensus cosine, and demonstrate mechanically distinct style execution on physical hardware.
+        When a robot has more degrees of freedom than a task constrains, multiple executions can achieve the same objective with distinct motion styles. Compositional robot control aims to preserve a selected style while following an independent task command, balancing potentially competing objectives. However, explicit style definitions can depend on platform-specific assumptions, while recordings entangle embodiments and constraints.
+      </p>
+      <p>
+        In this paper, we present <strong>CODES</strong>, a framework for compositional robot control that discovers a coherent style repertoire from diverse recordings and composes it with independent commands. Motion retargeting maps the recordings to motions executable by the target robot; weakly supervised consensus encoding and density-based clustering identify styles within and across recordings without a prescribed count; reinforcement learning trains a policy to compose them with independent commands.
+      </p>
+      <p>
+        A Unitree Go2 case study evaluates decomposition and control through baseline comparisons, two simulators, and hardware deployment. The motion collection combines mocap recordings with policy executions based on retargeted motions from animals and other robot platforms. CODES improves kinematic coherence over the no-coarse-guidance and VQ-VAE baselines. The controller tracks velocity commands beyond estimated recorded support in simulation and exhibits distinguishable style characteristics in cross-simulator and hardware executions.
       </p>
     </div>
 
-    <!-- Framework Stages Overview -->
-    <section>
-      <h2 class="section-heading">Framework Overview</h2>
-      <p class="section-intro">
-        The pipeline decouples style discovery from policy execution through three stages, enabling on-demand style conditioning under arbitrary independent task commands:
-      </p>
+    <!-- 1. Framework Overview -->
+    <section id="overview" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">System Architecture</span>
+        <h2 class="section-title">Framework Overview</h2>
+        <p class="section-description">
+          The CODES pipeline systematically decouples motion style discovery from reinforcement learning policy execution through three modular stages (Paper Section 3).
+        </p>
+      </div>
+
+      <div class="figure-container">
+        <img src="images/pipeline.png" alt="CODES Framework Overview Figure" loading="lazy">
+        <div class="figure-caption">
+          <strong>Figure 1: Pipeline of the proposed CODES framework.</strong>
+          <strong>A:</strong> Unpaired motion recordings across diverse embodiments and gaits are executed on a common robot platform to obtain realizable trajectories.
+          <strong>B:</strong> Temporal convolutional encoders learn an orthogonal-invariant consensus spherical geometry; density-based clustering (HDBSCAN) identifies style clusters without prescribing cluster count.
+          <strong>C:</strong> A shared RL policy is trained with sigmoid-gated style and velocity rewards to track independent task commands while expressing the conditioned style reference.
+        </div>
+      </div>
+
       <div class="stages-grid">
         <div class="stage-card">
-          <div class="stage-num">Stage 1</div>
+          <div class="stage-badge">1</div>
           <h3>Common Target Embodiment</h3>
-          <p>Motion data from multiple sources (including retargeted animal movements and teleoperated runs) are executed and recorded on a common quadruped platform to ensure kinematic realizability.</p>
+          <p>
+            Heterogeneous source recordings (including dog and horse motion captures, solo quadruped rollouts, and teleoperated executions) are projected onto the target Unitree Go2 embodiment, enforcing realizable kinematic and joint limits before representation learning.
+          </p>
         </div>
+
         <div class="stage-card">
-          <div class="stage-num">Stage 2</div>
+          <div class="stage-badge">2</div>
           <h3>Weakly Supervised Discovery</h3>
-          <p>An ensemble of temporal convolutional encoders learns an orthogonal-invariant consensus spherical geometry. HDBSCAN extracts 16 candidate styles and groups windows into reference pools without manual cluster thresholds.</p>
+          <p>
+            An ensemble of 10 temporal convolutional networks is trained under pairwise consensus constraints. HDBSCAN extracts 16 distinct candidate style clusters with hierarchical density boundaries, grouping motion windows into robust reference pools.
+          </p>
         </div>
+
         <div class="stage-card">
-          <div class="stage-num">Stage 3</div>
+          <div class="stage-badge">3</div>
           <h3>Compositional Controller</h3>
-          <p>A shared reinforcement learning policy is conditioned on a selected reference consensus code alongside independently commanded velocities, learning to retain the requested style while following task commands.</p>
+          <p>
+            A multi-objective RL controller is conditioned on an active reference consensus code alongside independently specified forward, lateral, and heading velocity commands, allowing the operator to steer arbitrary velocity profiles while enforcing distinct gaits.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- 1. Hardware Deployments -->
-    <section>
-      <h2 class="section-heading">1. Real-World Robot Deployments (Unitree Go2)</h2>
-      <p class="section-intro">
-        Physical quadruped hardware trials demonstrating distinct style execution on demand under user-commanded forward and heading velocities.
-      </p>
-      <div class="video-grid">
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/hardware_style_c00.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-hardware">Physical Deployment</span>
-            <h4>Style C00 Execution</h4>
-            <p>Execution of discovered candidate style C00 across commanded forward speeds on physical terrain.</p>
-          </div>
-        </div>
-
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/hardware_style_c14.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-hardware">Physical Deployment</span>
-            <h4>Style C14 Execution</h4>
-            <p>Characteristic trotting gait maintaining foot clearance and posture under live operator commands.</p>
-          </div>
-        </div>
-
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/hardware_style_c06.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-hardware">Physical Deployment</span>
-            <h4>Style C06 Execution</h4>
-            <p>Mechanical distinction in base height, stride duration, and contact phase compared to default locomotion.</p>
-          </div>
-        </div>
+    <!-- 2. Robot Deployment -->
+    <section id="real-world" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Hardware Verification</span>
+        <h2 class="section-title">Robot Deployment</h2>
+        <p class="section-description">
+          Live physical deployment on the Unitree Go2 robot showing style execution under continuous operator commands. The policy, reference bank, and InEKF state estimation run onboard the Jetson without external motion capture or offboard inference (Paper Section 4.4).
+        </p>
       </div>
-    </section>
 
-    <!-- 2. Matched Simulation & Style Preservation -->
-    <section>
-      <h2 class="section-heading">2. Matched Simulation Rollouts Across Commanded Velocities</h2>
-      <p class="section-intro">
-        Matched evaluation across candidate styles evaluated at varying forward velocity profiles (0.5 m/s, 0.8 m/s, and style reference velocity).
-      </p>
-      <div class="video-grid">
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/sim_vx0p5_matched.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
-            <h4>Low Velocity Profile (0.5 m/s)</h4>
-            <p>Evaluating style preservation and tracking accuracy when commanded speed differs from the reference recording speed.</p>
-          </div>
+      <div class="deployment-showcase">
+        <div class="video-player-wrapper">
+          <video id="hardwarePlayer" controls loop muted playsinline preload="metadata" poster="images/pipeline.png" src="videos/real_world/real_deployment_telemetry_1080p.mp4">
+            Your browser does not support HTML5 video.
+          </video>
         </div>
 
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/sim_vx0p8_matched.mp4"></video>
+        <div class="deployment-details">
+          <div class="deployment-meta-header">
+            <span class="tag-hardware-badge">Unitree Go2 Physical Hardware · Sliding Telemetry Overlay</span>
+            <span style="font-size:0.82rem; font-weight:600; color:var(--text-light); background:var(--bg-subtle); padding:0.25rem 0.65rem; border-radius:6px; border:1px solid var(--border);">1080p HD Video</span>
           </div>
-          <div class="video-info">
-            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
-            <h4>High Velocity Profile (0.8 m/s)</h4>
-            <p>Assessing style expressibility and dynamic stability at higher commanded transit rates.</p>
-          </div>
-        </div>
 
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/sim_ref_vx_matched.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-sim">Isaac Lab / MuJoCo</span>
-            <h4>Nominal Reference Velocity</h4>
-            <p>Tracking the recording's original forward velocity while maintaining reference consensus fidelity.</p>
+          <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+            The synchronized telemetry display exhibits 60 Hz onboard estimates of commanded forward velocity \(v_x\), lateral velocity \(v_y\), heading rate \(\omega_z\), joint torque excursions, and kinematic foot ground-contact states over a trailing 4-second sliding window. The policy is safeguard fine-tuned for 2,000 iterations with joint targets clipped to 0.025 rad within physical limits, matching deployment safeguards. The mission switches sequentially through styles <strong>C04</strong> (low crawl), <strong>C00</strong> (horse-derived trot/walk), <strong>C14</strong> (forward jumps), and <strong>C11</strong> (sit down/up) at a fixed \(0.5\) m/s forward command.
+          </p>
+
+          <div class="deployment-features-grid">
+            <div class="dep-feature">
+              <h4>Independent Task Steering</h4>
+              <p>Continuous velocity tracking from live operator joystick input, navigating variable planar vectors without compromising gait stability.</p>
+            </div>
+            <div class="dep-feature">
+              <h4>Consensus Style Cosine</h4>
+              <p>Style fidelity is measured causal-window-wise via reference consensus cosine, retaining style affinity throughout active maneuvers.</p>
+            </div>
+            <div class="dep-feature">
+              <h4>Zero-Shot Sim-to-Real</h4>
+              <p>Direct policy transfer with domain randomization on contact friction, motor damping, and link inertia without sim-to-real fine-tuning.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. Dynamic Transitions -->
-    <section>
-      <h2 class="section-heading">3. Dynamic Online Style Transitions</h2>
-      <p class="section-intro">
-        Switching between candidate style references in real time under continuous, fixed forward velocity commands.
-      </p>
-      <div class="video-grid">
-        <div class="video-card">
-          <div class="video-container">
-            <video controls autoplay loop muted playsinline src="videos/transitions_schedule.mp4"></video>
-          </div>
-          <div class="video-info">
-            <span class="tag tag-transition">Transitions</span>
-            <h4>Sequential Multi-Style Switch</h4>
-            <p>Consecutive reference switches (C00 &rarr; C14 &rarr; C06 &rarr; C04 &rarr; C07) showing rapid adaptation without gait failure.</p>
-          </div>
+    <!-- 3. Reference Bank -->
+    <section id="reference-motions" class="content-section">
+      <div class="section-header">
+        <span class="section-tag">Motion Style Repertoire</span>
+        <h2 class="section-title">Reference Bank</h2>
+        <p class="section-description">
+          Explore the discovered motion references for our controller (<strong>CODES</strong>, \(K=16\)) alongside the discrete codebook baseline (<strong>VQ-VAE</strong>, 17 active codes) and the unsupervised ablation (<strong>No coarse terms</strong>, \(K=15\)). Select a model and style group to inspect the representative motion kinematics (Paper Section 4.1).
+        </p>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <div class="control-field">
+          <label for="refModelSelect">1. Select Controller Model</label>
+          <select id="refModelSelect" class="custom-select" onchange="onRefModelChange()">
+            <option value="model_a" selected>CODES (ours) — 10-Encoder Consensus Repertoire (K=16, Iter 19,999)</option>
+            <option value="u_c10">No coarse terms — Unsupervised Representation Ablation (K=15, Iter 19,999)</option>
+            <option value="vqvae">VQ-VAE — Discrete Codebook Baseline (K=256, 17 Active Codes, Iter 8,000)</option>
+          </select>
         </div>
+
+        <div class="control-field">
+          <label for="refClusterSelect">2. Select Discovered Style Group / Code</label>
+          <select id="refClusterSelect" class="custom-select" onchange="onRefClusterChange()">
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Reference Container -->
+      <div id="referenceDisplayRoot">
+        <!-- Populated dynamically via JS -->
       </div>
     </section>
 
+    <!-- Footer -->
     <footer>
-      <p>Anonymous Supplementary Material for Double-Blind Peer Review.</p>
+      <p><strong>CODES: Weakly Supervised Discovery of Motion Styles for Compositional Robot Control</strong></p>
+      <p style="margin-top: 0.5rem;">Supplementary Material for Double-Blind Peer Review · Submission to ICRA 2027.</p>
     </footer>
+
   </div>
 
+  <!-- Interactive Scripts -->
+  <script>
+    // Style Group human-readable labels from Paper Section 4.1
+    const STYLE_GROUP_LABELS = {
+      0: "Group C00 (Horse-Derived Locomotion)",
+      1: "Group C01 (AI4-Dog Canter / Run)",
+      2: "Group C02 (Solo8 Walk)",
+      3: "Group C03 (Solo8 Scoot Forward)",
+      4: "Group C04 (Solo8 Low Crawl)",
+      5: "Group C05 (AI4-Dog Turn)",
+      6: "Group C06 (AI4-Dog Walk)",
+      7: "Group C07 (AI4-Dog Trot)",
+      8: "Group C08 (Bound Canonical)",
+      9: "Group C09 (Serpentine Walk)",
+      10: "Group C10 (Figure-8 Walk)",
+      11: "Group C11 (Sit Down / Up & Stretch)",
+      12: "Group C12 (Low Bound / Sit)",
+      13: "Group C13 (Figure-8 Jump)",
+      14: "Group C14 (Forward Jumps)",
+      15: "Group C15 (Lay Down / Up)"
+    };
+
+    // State
+    let currentModel = 'model_a';
+    let currentAffordanceClusterIdx = 0;
+    let activeCellElement = null;
+
+    // References Data (fallback to global object from script tags)
+    const REFS = window.REFERENCES_DATA || {};
+    const AFF = window.AFFORDANCE_DATA || {};
+
+    // Initialize Reference Model Select
+    function initReferencesUI() {
+      const modelSelect = document.getElementById('refModelSelect');
+      if (!modelSelect) return;
+      onRefModelChange();
+    }
+
+    function onRefModelChange() {
+      const modelSelect = document.getElementById('refModelSelect');
+      const clusterSelect = document.getElementById('refClusterSelect');
+      currentModel = modelSelect.value;
+
+      clusterSelect.innerHTML = '';
+
+      if (currentModel === 'model_a') {
+        const clusters = (REFS.model_a && REFS.model_a.clusters) || [];
+        clusters.forEach((c, idx) => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = STYLE_GROUP_LABELS[idx] || c.name;
+          clusterSelect.appendChild(opt);
+        });
+      } else if (currentModel === 'vqvae') {
+        const codes = (REFS.vqvae && REFS.vqvae.codes) || [];
+        codes.forEach(code => {
+          const opt = document.createElement('option');
+          opt.value = code.id;
+          opt.textContent = `${code.name} (${code.exemplars ? code.exemplars.length : 0} exemplars, ${code.windows} windows)`;
+          clusterSelect.appendChild(opt);
+        });
+      } else if (currentModel === 'u_c10') {
+        const clusters = (REFS.u_c10 && REFS.u_c10.clusters) || [];
+        clusters.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `No Coarse Terms ${c.name}`;
+          clusterSelect.appendChild(opt);
+        });
+      }
+
+      onRefClusterChange();
+    }
+
+    function onRefClusterChange() {
+      const clusterSelect = document.getElementById('refClusterSelect');
+      const root = document.getElementById('referenceDisplayRoot');
+      const selectedId = clusterSelect.value;
+
+      root.innerHTML = '';
+
+      if (currentModel === 'model_a') {
+        const cluster = (REFS.model_a.clusters || []).find(c => c.id === selectedId);
+        if (!cluster) return;
+
+        const grid = document.createElement('div');
+        grid.className = 'reference-gallery-grid';
+
+        (cluster.samples || []).forEach(sample => {
+          const card = document.createElement('div');
+          card.className = 'ref-video-card';
+          card.innerHTML = `
+            <div class="ref-video-thumb">
+              <video src="${sample.video_path}" controls loop muted playsinline preload="metadata"></video>
+            </div>
+            <div class="ref-video-info">
+              <div class="ref-video-header">
+                <span class="ref-sample-pill">Sample ${sample.sample_num}</span>
+              </div>
+              <div class="ref-source-name">${sample.source_desc || 'Discovered Kinematic Window'}</div>
+              <div class="ref-window-note">${sample.window_desc || '2.50 s central representative window'}</div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        root.appendChild(grid);
+      } else if (currentModel === 'vqvae') {
+        const code = (REFS.vqvae.codes || []).find(c => c.id === selectedId);
+        if (!code) return;
+
+        const grid = document.createElement('div');
+        grid.className = 'reference-gallery-grid';
+
+        (code.exemplars || []).forEach(ex => {
+          const card = document.createElement('div');
+          card.className = 'ref-video-card';
+          card.innerHTML = `
+            <div class="ref-video-thumb">
+              <video src="${ex.video_path}" controls loop muted playsinline preload="metadata"></video>
+            </div>
+            <div class="ref-video-info">
+              <div class="ref-video-header">
+                <span class="ref-sample-pill">Exemplar ${ex.exemplar_id}</span>
+                <span style="font-size:0.75rem; color:#64748b;">${ex.source_category}</span>
+              </div>
+              <div class="ref-source-name">${ex.recording_name}</div>
+              <div class="ref-window-note">Mean vx: ${ex.mean_vx.toFixed(2)} m/s · Base Height: ${ex.mean_height.toFixed(2)} m</div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        root.appendChild(grid);
+      } else if (currentModel === 'u_c10') {
+        const cluster = (REFS.u_c10.clusters || []).find(c => c.id === selectedId);
+        if (!cluster) return;
+
+        const pairGrid = document.createElement('div');
+        pairGrid.className = 'pair-comparison-grid';
+
+        pairGrid.innerHTML = `
+          <div class="pair-col-card">
+            <div class="pair-col-header">Commanded Reference Kinematics</div>
+            <div class="ref-video-thumb">
+              <video src="${cluster.reference_video}" controls loop muted playsinline preload="metadata"></video>
+            </div>
+            <div class="ref-video-info">
+              <div class="ref-source-name">${cluster.name} Reference</div>
+              <div class="ref-window-note">${cluster.description}</div>
+            </div>
+          </div>
+          <div class="pair-col-card">
+            <div class="pair-col-header">Controller Rollout Execution (vx = 0.50 m/s)</div>
+            <div class="ref-video-thumb">
+              <video src="${cluster.rollout_video}" controls loop muted playsinline preload="metadata"></video>
+            </div>
+            <div class="ref-video-info">
+              <div class="ref-source-name">Evaluation Rollout</div>
+              <div class="ref-window-note">Isaac Sim evaluation tracking reference style at vx = 0.50 m/s</div>
+            </div>
+          </div>
+        `;
+
+        root.appendChild(pairGrid);
+      }
+    }
+
+    function renderLaTeX() {
+      if (window.renderMathInElement) {
+        window.renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true }
+          ],
+          throwOnError: false,
+          ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"]
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initReferencesUI();
+      renderLaTeX();
+    });
+    window.addEventListener('load', renderLaTeX);
+  </script>
 </body>
 </html>
