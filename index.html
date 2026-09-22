@@ -27,10 +27,9 @@
     </nav>
   </header>
   <main>
-    <section id="real-world" class="teaser content-section" aria-label="Real-world deployment">
-      <video id="hardwarePlayer" controls muted playsinline preload="metadata" poster="images/deployment_style_switches.jpg" src="videos/real_world/deployment_style_switches_720p.mp4">Your browser does not support HTML5 video.</video>
-      <p class="teaser-caption"><strong>One forward command, different motion styles.</strong> The Go2 follows a 0.5 m/s forward command while the selected style changes.</p>
-      <p class="footnote">Yellow highlights mark style selections. Playback is at real speed; the operator provides heading corrections. <a href="technical.html#deployment">Deployment details</a></p>
+    <section id="project-video" class="teaser content-section" aria-label="Narrated project overview">
+      <video id="overviewPlayer" controls playsinline preload="metadata" poster="images/codes_overview.jpg" src="videos/overview/codes_overview_narrated.mp4">Your browser does not support HTML5 video.</video>
+      <p class="footnote">Narrated overview of CODES.</p>
     </section>
     <section id="abstract" class="abstract-section">
       <div class="reading-column">
@@ -102,7 +101,13 @@
       <p class="small-note explorer-footnote">Yaw-rate command is zero. Colors summarize three trials; the video always shows trial 1. The two-second reference loops alongside the simulation execution without phase alignment. <a href="technical.html#velocity">Metrics and evaluation protocol</a></p>
       <p class="section-link"><a href="controllers.html">Compare with baseline controllers →</a></p>
     </section>
-    <noscript><p class="reading-column">Enable JavaScript to browse styles and compare controllers. The deployment video and <a href="technical.html">technical descriptions</a> remain available.</p></noscript>
+    <section id="real-world" class="content-section deployment-section" aria-labelledby="deployment-heading">
+      <h2 id="deployment-heading">Real-world deployment</h2>
+      <video id="hardwarePlayer" controls muted playsinline preload="metadata" poster="images/deployment_style_switches.jpg" src="videos/real_world/deployment_style_switches_720p.mp4">Your browser does not support HTML5 video.</video>
+      <p class="teaser-caption"><strong>One forward command, different motion styles.</strong> The Go2 follows a 0.5 m/s forward command while the selected style changes.</p>
+      <p class="footnote">Yellow highlights mark style selections. Playback is at real speed; the operator provides heading corrections. <a href="technical.html#deployment">Deployment details</a></p>
+    </section>
+    <noscript><p class="reading-column">Enable JavaScript to browse styles and compare controllers. The overview and deployment videos and <a href="technical.html">technical descriptions</a> remain available.</p></noscript>
   </main>
   <footer><p><a href="controllers.html">Controller comparisons</a> · <a href="technical.html">Quantitative results and technical details</a></p><p>Anonymous supplementary material · ICRA 2027 submission</p><p>Website layout inspired by <a href="https://nerfies.github.io/">Nerfies</a>.</p></footer>
 </body>
